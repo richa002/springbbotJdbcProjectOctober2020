@@ -5,97 +5,139 @@ import io.pragra.learning.jdbcapp.constants.SQLs;
 import io.pragra.learning.jdbcapp.domain.Blog;
 import io.pragra.learning.jdbcapp.domain.User;
 import io.pragra.learning.jdbcapp.exceptions.UserNotFoundException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 @Slf4j
+@Data
+
+
 public class BlogDao {
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-   private UserDao userDao;
 
-    public BlogDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        createTable();
+    private NamedParameterJdbcTemplate template;
+
+    public BlogDao(NamedParameterJdbcTemplate template) {
+        /*
+        USER_ID INT,
+BLOG_NAME CHAR(235),
+BLOG_CATAGORY INT,
+BLOG_TEXT CHAR(5000)
+         */
+        this.template = template;
+        String sql = "CREATE TABLE BLOG (BLOG_ID INT,USER_ID INT,BLOG_NAME CHAR(235), BLOG_CATAGORY varchar(50),BLOG_TEXT text(5000))";
+        //  template.getJdbcTemplate().execute(sql);
     }
 
-
-    public void createTable(){
-        log.info("creating table Blog");
-        jdbcTemplate.execute(SQLs.BLOG_SQL);
-    }
-
-
-    public int  createBlog(Blog blog){
-
-       User u= userDao.getUser(blog.getUserId());
-       if(u==null){
-           try{
-           throw new UserNotFoundException("User with user ID "+blog.getUserId()+" is not a registered user..cant create a blog");}catch(UserNotFoundException e){
-               log.error("{}",e.getMessage());
-               return 0;
-           }
-       }
-       else{
-        String sql="INSERT INTO BLOG VALUES(?,?,?,?,?)";
-        int n=jdbcTemplate.update(sql,new Object[]{blog.getBlogId(),blog.getUserId(),blog.getBlogName(),blog.getBlogCatagory(),blog.getBlogText()});
-        log.info("successfully inserted a blog with blog id "+blog.getBlogId());
-        return n;
-       }
-    }
+    public int createBlog(Blog blog) {
+        /**
+         *  private int blogId;
+         *     private int userId;
+         *     private String blogName;
+         *     private String blogCatagory;
+         *     private String blogCatagory;
+         */
+//    String sql1="SELECT * FROM USER WHERE USER_ID=:userId";
+//    User u;
+//    SqlParameterSource source1=new MapSqlParameterSource("userId",blog.getUserId());
+//    try {
+//         u = template.queryForObject(sql1, source1, new BeanPropertyRowMapper<User>(User.class));
+//        if(u!=null){
+        int n = 0;
+        boolean flag = checkIfUserExists(blog.getUserId());
+        if (flag == true) {
+            String sql = "INSERT INTO BLOG VALUES(:blogId,:userId,:blogName,:blogCatagory,:blogCatagory)";
+            SqlParameterSource source = new BeanPropertySqlParameterSource(blog);
+            log.info("{}", "Blog created successfully with blog Id :" + blog.getBlogId());
 
 
-    public int updateBlog(Blog blog){
-        String sql="UPDATE BLOG SET BLOG_NAME=? WHERE BLOG_ID=?";
-        int n=jdbcTemplate.update(sql,blog.getBlogName(),blog.getBlogId());
-        if(n==0) {
-            try {
-                throw new UserNotFoundException("BlogId "+blog.getBlogId()+" not found..cant be updated");
-            }catch(UserNotFoundException e){
-                log.error("{}",e.getMessage());
-            }
+            n = template.update(sql, source);
+        } else{
+            log.error("{}", "Blog  cant be created with blog Id :" + blog.getBlogId());
+
         }
-        else log.info("blog with blog id "+blog.getBlogId()+" updated successfully");
-        return n;
+            return n;
     }
 
-
-    public Blog getBlog(int blogId){
-        Blog blog=null;
-        String sql="SELECT * FROM  BLOG WHERE BLOG_ID=?";
+    public boolean checkIfUserExists(int userId) {
+        String sql1 = "SELECT * FROM USER WHERE USER_ID=:userId";
+        User u = null;
+        SqlParameterSource source1 = new MapSqlParameterSource("userId", userId);
         try {
-            blog= jdbcTemplate.queryForObject(sql, new Object[]{blogId}, new BeanPropertyRowMapper<Blog>(Blog.class));
-
+            u = template.queryForObject(sql1, source1, new BeanPropertyRowMapper<User>(User.class));
+        } catch (Exception e) {
+            log.error("{}", "user doesnot exixts..cant perform the operation");
         }
-    catch(Exception e){
-           log.error("Blog with blogId "+ blogId+" doesnot exists");
-    }
-        return blog;
+        if (u == null) return false;
+        else return true;
     }
 
-    public List<Blog> getAllBlogs(){
-        String sql="SELECT * FROM BLOG ";
-        log.info("returning list of blogs");
-        return jdbcTemplate.query(sql,new BeanPropertyRowMapper<Blog>(Blog.class));
-
+    public int updateBlog(Blog blog) {
+        int n = 0;
+        boolean flag = checkIfUserExists(blog.getUserId());
+        if (flag == true) {
+            String sql = "update BLOG set USER_ID=:userId,BLOG_NAME=:blogName,BLOG_CATAGORY=:blogCatagory where BLOG_ID=:blogId";
+            SqlParameterSource source = new BeanPropertySqlParameterSource(blog);
+            n = template.update(sql, source);
+            return n;
+        } else return n;
     }
-    public void deleteBlog(int blogId){
-        String sql="DELETE FROM BLOG where BLOG_ID=?";
 
-       int n= jdbcTemplate.update(sql,blogId);
-       if(n==0){
-           try{
-           throw  new UserNotFoundException("Blog does not exists and cant be deleted");
-       }catch(UserNotFoundException e){
-               log.error("{}",e.getMessage());
-           }
-       }
-else log.info("blog  with blogid"+ blogId+" deleted successfully");
+    public int deleteBlog(int blogId) {
+        /**
+         *  private int blogId;
+         *     private int userId;
+         *     private String blogName;
+         *     private String blogCatagory;
+         *     private String blogCatagory;
+         */
+
+        String sql = "delete from BLOG where BLOG_ID=:blogId";
+        SqlParameterSource source = new MapSqlParameterSource("blogId", blogId);
+        return template.update(sql, source);
     }
+
+    public Blog getBlog(int blogId) {
+        /**
+         *  private int blogId;
+         *     private int userId;
+         *     private String blogName;
+         *     private String blogCatagory;
+         *     private String blogCatagory;
+         */
+
+        String sql = "select * from BLOG where  BLOG_ID =:blogId";
+        SqlParameterSource source = new MapSqlParameterSource("blogId", blogId);
+
+        return template.queryForObject(sql, source, new BeanPropertyRowMapper<Blog>(Blog.class));
+    }
+
+    public List<Blog> getAllBlogs() {
+        /**
+         *  private int blogId;
+         *     private int userId;
+         *     private String blogName;
+         *     private String blogCatagory;
+         *     private String blogCatagory;
+         */
+
+        String sql = "select * from BLOG ";
+        ;
+
+        return template.query(sql, new BeanPropertyRowMapper<Blog>(Blog.class));
+    }
+
+
 }

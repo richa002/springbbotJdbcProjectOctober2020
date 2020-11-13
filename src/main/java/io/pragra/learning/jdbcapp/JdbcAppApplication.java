@@ -33,32 +33,40 @@ public class JdbcAppApplication {
     @Bean
     CommandLineRunner runner(){
         return args->{
-            User user=new User(1,"john","hjkahsjd", Instant.now());
-          //  userDao.createUser(user);
-//            User user2=new User(2,"richa","hjkahsjd", Instant.now());
+           User user=new User(4,"richa","hjkahsjd", new Date());
+            userDao.createUser(user);
+//            User user2=new User(2,"richa","hjkahsjd", new Date());
 //            userDao.createUser(user2);
-//            User user3=new User(3,"SEEMA","hjkahsjd", Instant.now());
+//            User user3=new User(3,"SEEMA","hjkahsjd", new Date());
 //            userDao.createUser(user3);
 //            System.out.println("no.of users in user table :"+userDao.countUser());
 //          //  userDao.deleteUser(4);
 
 //        userDao.deleteUser(2);
 //           System.out.println(userDao.getAllUsers());
-//   System.out.println("user with user id :10 ="+userDao.getUser(10));
+  System.out.println("user with user id :4 ="+userDao.getUser(4));
 //     userDao.updateUser(new User(10,"JOHN DOE","hjkahsjd", Instant.now()));
-//       Blog blog=new Blog(1,1,"hjkahsjd","hgjfshdj","njs" );
-//            Blog blog2=new Blog(2,2,"hjkahsjd","hgjfshdj","njs" );
-//
-//         blogDao.createBlog(blog);
-//            blogDao.createBlog(blog2);
-//            System.out.println( blogDao.getAllBlogs());
-//            System.out.println(blogDao.getBlog(10));
-//            blogDao.deleteBlog(10);
-//            blogDao.updateBlog(new Blog(2,2,"Hello","hgjfshdj","njs" ));
+            Blog blog2=new Blog(2,5,"blog50","catagory20","text20" );
 
-//            log.info("blogDaos {}"+blogDao.getAllBlogs());
-//
-//
+        Blog blog3=new Blog(3,5,"blog50","catagory20","text20" );
+//            blogDao.createBlog(blog);
+//            blogDao.createBlog(blog2);
+
+//            blogDao.createBlog(blog3);
+
+//            System.out.println("BLog with blog Id 2 is: "+blogDao.getBlog(2));
+           System.out.println("fetching all blogs: "+ blogDao.getAllBlogs());
+
+////            System.out.println(blogDao.getBlog(10));
+            int a=blogDao.deleteBlog(7);
+           if(a>0) System.out.println("blog deleted successfully");
+           else System.out.println("Blog cant be deleted");
+//          int n= blogDao.updateBlog(blog2);
+//       if(n==1) System.out.println("blog updated successfully");
+//       else System.out.println("blog cant be updated");
+//////            log.info("blogDaos {}"+blogDao.getAllBlogs());
+//////
+//////
 
         };
     }

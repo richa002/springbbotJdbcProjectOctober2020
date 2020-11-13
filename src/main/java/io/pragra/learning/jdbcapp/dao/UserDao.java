@@ -7,8 +7,12 @@ import io.pragra.learning.jdbcapp.exceptions.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -18,7 +22,7 @@ public class UserDao {
 
     public UserDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        createTable();
+       // createTable();
     }
 
 
@@ -55,11 +59,14 @@ public class UserDao {
     public int countUser(){
       return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USER",Integer.class);
     }
+
+
     public User getUser(int userId){
         User u=null;
         try {
         String sql = "SELECT * FROM USER WHERE USER_ID=?";
-         u= jdbcTemplate.queryForObject(sql, new Object[]{userId}, new BeanPropertyRowMapper<User>(User.class));
+//         u= jdbcTemplate.queryForObject(sql, new Object[]{userId}, new BeanPropertyRowMapper<User>(User.class));
+            u= jdbcTemplate.queryForObject(sql, new Object[]{userId},new MyRowMapper());
         }catch(Exception e){
            // log.error("{}",e.getMessage());
             log.error("user  with user id "+userId+" not found");
@@ -89,4 +96,18 @@ if (n==0) {
 }
 else log.info("successfully deleted user with user id :"+userId);
     }
+
+    private class MyRowMapper implements RowMapper<User>{
+
+        @Override
+        public User mapRow(ResultSet resultSet, int i) throws SQLException {
+            User user=new User();
+            user.setUserId(resultSet.getInt("USER_ID"));
+            user.setUserPass(resultSet.getString("USER_PASS"));
+            user.setUserName(resultSet.getString("USER_NAME"));
+            user.setCreateDate(new Date(resultSet.getDate("CREATE_DATE").getTime()));
+            return user;
+        }
+        }
+
 }

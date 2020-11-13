@@ -16,5 +16,5 @@ public class User {
     private int userId;
     private String userName;
     private String userPass;
-    private Instant createDate;
+    private Date createDate;
 }

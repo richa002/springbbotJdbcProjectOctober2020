@@ -33,7 +33,7 @@ class JdbcAppApplicationTests {
    @Test
     void contextLoads() {
     }
-    @Test
+   // @Test
     public void testCreateUser(){
         User testUser=getUserForTesting();
         System.out.println(testUser);
@@ -45,13 +45,13 @@ class JdbcAppApplicationTests {
 
 
     }
-   @Test
+   //@Test
     public void testUpdateUser(){
       System.out.println("in update test meythod"+userDao.countUser());
       System.out.println(userDao.getAllUsers());
     User testUser=getUserForUpdateTesting();
       System.out.println(testUser);
-      userDao.createUser(new User(11,"richa luthra","pass",Instant.now()));
+      userDao.createUser(new User(11,"richa luthra","pass",new Date()));
        System.out.println(userDao.getAllUsers());
 
        userDao.updateUser(testUser);
@@ -62,7 +62,7 @@ class JdbcAppApplicationTests {
 
     }
 
-    @Test
+    //@Test
     public void testDeleteUser(){
         User testUser=getUserForTesting();
         System.out.println(testUser);
@@ -72,7 +72,7 @@ class JdbcAppApplicationTests {
 
 
     }
-    @Test
+    //@Test
     public void testGetUser(){
        User u= userDao.getUser(11);
 
@@ -80,7 +80,7 @@ class JdbcAppApplicationTests {
 
 
     }
-    @Test
+   // @Test
     public void testGetUser2(){
         User u= userDao.getUser(12);
 
@@ -104,12 +104,12 @@ class JdbcAppApplicationTests {
 
     public  User getUserForTesting(){
      //   Instant date =Instant.now();
-        User user =new User(10,"savita kumari","10101", Instant.now());
+        User user =new User(10,"savita kumari","10101", new Date());
         return user;
     }
     public User getUserForUpdateTesting(){
         //   Instant date =Instant.now();
-        User user =new User(11,"richa","10101", Instant.now());
+        User user =new User(11,"richa","10101", new Date());
         return user;
     }
 }
